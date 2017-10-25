@@ -48,6 +48,10 @@ public class MainJFrame extends JFrame {
         super();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+
+        //tab 1
         Box box = Box.createVerticalBox();
         box.setBorder(new EmptyBorder(10, 10, 10, 10));
 
@@ -102,7 +106,13 @@ public class MainJFrame extends JFrame {
         resultPanel.add(result);
         box.add(scrollPanel);
         box.add(Box.createVerticalGlue());
-        setContentPane(box);
+
+        // end tab 1
+
+        tabbedPane.addTab("123123", box);
+        tabbedPane.addTab("123123", new Label("asdasd"));
+
+        setContentPane(tabbedPane);
         setSize(width, height);
     }
 
