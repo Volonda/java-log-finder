@@ -1,12 +1,9 @@
 package finder;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.List;
-import static javax.swing.GroupLayout.Alignment.*;
 
 public class MainJFrame extends JFrame {
 
@@ -72,19 +69,16 @@ public class MainJFrame extends JFrame {
 
             public void actionPerformed(ActionEvent event) {
 
-                tabbedPane.addTab("Результат", new Label("asdasd"));
-
                 if (selectedFile != null) {
-                    try {
-                        FileAnalyzer analyzer = new FileAnalyzer();
-                        List<SearchEntry> entryCollection = analyzer.tree(
-                            selectedFile.toString(),
-                            fileExtension.getText(),
-                            search.getText()
-                        );
-                    } catch (Exception e) {
-                        message.setText("Ошибка:" + e.getMessage());
-                    }
+
+                    Thread thread = new AnalyzerThread(
+                        search.getText(),
+                        selectedFile.toString(),
+                        fileExtension.getText(),
+                        tabbedPane
+                    );
+
+                    thread.start();
                 }
             }
         });

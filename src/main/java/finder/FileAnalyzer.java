@@ -14,9 +14,9 @@ import java.nio.file.Path;
 
 public class FileAnalyzer {
 
-    public List<SearchEntry> tree(String path, String extension, String search) throws Exception
+    public List<File> tree(String path, String extension, String search) throws Exception
     {
-        ArrayList<SearchEntry> collection = new ArrayList<>();
+        ArrayList<File> collection = new ArrayList<>();
 
         Stream files = Files.walk(Paths.get(path))
             .filter(Files::isRegularFile)
@@ -36,19 +36,17 @@ public class FileAnalyzer {
     }
 
 
-    private void addSearchEntry(File file, String search, List<SearchEntry> collection) throws FileNotFoundException
+    private void addSearchEntry(File file, String search, List<File> collection) throws FileNotFoundException
     {
         Scanner scanner = new Scanner(file);
         Pattern p = Pattern.compile(".*" + search + ".*");
 
-        int lineNum = 0;
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-            lineNum++;
             Matcher m = p.matcher(line);
             if (m.matches()) {
-                SearchEntry entry = new SearchEntry(file, lineNum, line);
-                collection.add(entry);
+                collection.add(file);
+                break;
             }
         }
     }
