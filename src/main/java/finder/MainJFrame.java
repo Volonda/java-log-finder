@@ -6,18 +6,25 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.List;
- 
+import static javax.swing.GroupLayout.Alignment.*;
+
 public class MainJFrame extends JFrame {
 
     private JFileChooser fc = new JFileChooser();
-    private Label label1v1 = new Label("Директория не выбрана");
+    private JLabel fcValue = new JLabel("Директория не выбрана");
     private JTextField search = new JTextField();
     private JTextField fileExtension = new JTextField("log");
+    private JLabel fileExtensionLabel = new JLabel("Расширение файлов");
     private File selectedFile;
     private int width = 600;
     private int height = 600;
-    private JTextArea result = new JTextArea(width, height);
-   
+    private JLabel message = new JLabel();
+    private JLabel searchLabel = new JLabel("Что искать?");
+    private JButton findButton = new JButton("Поиск");
+    private JButton button = new JButton("Выбрать директорию");
+    private JLabel labelButton = new JLabel("Где искать?");
+    private JTabbedPane tabbedPane = new JTabbedPane();
+
     private class JFileChooserActionListener implements ActionListener {
         public void actionPerformed(ActionEvent ae)
         {
@@ -29,7 +36,7 @@ public class MainJFrame extends JFrame {
             switch (response)
             {
                 case JFileChooser.APPROVE_OPTION:
-                    label1v1.setText(fc.getSelectedFile().toString());
+                    fcValue.setText(fc.getSelectedFile().toString());
                     selectedFile = fc.getSelectedFile();
                     break;
 
@@ -48,35 +55,24 @@ public class MainJFrame extends JFrame {
         super();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-
-        //tab 1
-        Box box = Box.createVerticalBox();
-        box.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-        box.add(new Label("Что искать?"));
-        search.setMaximumSize(new Dimension(width, 25));
-        box.add(search);
-
-        box.add(new Label("Где искать?"));
-        box.add(label1v1);
-
-        JButton button = new JButton("Выбрать директорию");
+        // Определение менеджера расположения
+        GroupLayout layout = new GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        message.setMaximumSize(new Dimension(width, 25));
+        search.setMaximumSize(new Dimension(width, 20));
         button.setMaximumSize(new Dimension(200, 20));
         ActionListener al = new JFileChooserActionListener();
         button.addActionListener(al);
-        box.add(button);
-
-        box.add(new Label("Расширение файлов"));
         fileExtension.setMaximumSize(new Dimension(width, 25));
-        box.add(fileExtension);
-        box.add(Box.createVerticalStrut(10));
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
-        JButton findButton = new JButton("Поиск");
         findButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent event) {
+
+                tabbedPane.addTab("Результат", new Label("asdasd"));
 
                 if (selectedFile != null) {
                     try {
@@ -86,45 +82,61 @@ public class MainJFrame extends JFrame {
                             fileExtension.getText(),
                             search.getText()
                         );
-                        renderEntryCollection(entryCollection);
                     } catch (Exception e) {
-                        result.setText("Ошибка:" + e.getMessage());
-                        box.validate();
-                        box.repaint();
+                        message.setText("Ошибка:" + e.getMessage());
                     }
                 }
             }
         });
-        box.add(findButton);
 
-        box.add(new Label("Результат поиска"));
-        box.add(Box.createVerticalGlue());
-        result.setEditable(false);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup()
+                .addGroup(
+                    layout.createSequentialGroup()
+                        .addComponent(searchLabel)
+                        .addGap(20)
+                        .addComponent(search)
+                ).addGroup(
+                    layout.createSequentialGroup()
+                        .addComponent(labelButton)
+                        .addGap(20)
+                        .addComponent(fcValue)
+                        .addComponent(button)
+                ).addGroup(
+                    layout.createSequentialGroup()
+                        .addComponent(fileExtensionLabel)
+                        .addGap(20)
+                        .addComponent(fileExtension)
+                        .addComponent(findButton)
+                ).addGroup(
+                    layout.createSequentialGroup()
+                        .addComponent(tabbedPane)
+                )
+        );
 
-        JPanel resultPanel = new JPanel();
-        JScrollPane scrollPanel = new JScrollPane(resultPanel);
-        resultPanel.add(result);
-        box.add(scrollPanel);
-        box.add(Box.createVerticalGlue());
+        layout.setVerticalGroup(
+            layout.createSequentialGroup().addGroup(
+                    layout.createParallelGroup()
+                        .addComponent(searchLabel)
+                        .addComponent(search)
+                ).addGroup(
+                    layout.createParallelGroup()
+                        .addComponent(labelButton)
+                        .addComponent(fcValue)
+                        .addComponent(button)
+                ).addGroup(
+                    layout.createParallelGroup()
+                        .addComponent(fileExtensionLabel)
+                        .addComponent(fileExtension)
+                        .addComponent(findButton)
+                )
+                .addGroup(
+                    layout.createParallelGroup()
+                        .addComponent(tabbedPane)
+                )
+        )
+        ;
 
-        // end tab 1
-
-        tabbedPane.addTab("123123", box);
-        tabbedPane.addTab("123123", new Label("asdasd"));
-
-        setContentPane(tabbedPane);
         setSize(width, height);
-    }
-
-    private void renderEntryCollection(List<SearchEntry> collection)
-    {
-        String rowPattern = "Файл: %s \n Строка: %s \n Вхождение: %s\n\n";
-        result.setText("");
-
-        for(SearchEntry entry : collection) {
-            String text = String.format(rowPattern, entry.getFile().toString(), entry.getLineNum(), entry.getLineText());
-
-            result.append(text);
-        }
     }
 }
