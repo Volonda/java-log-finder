@@ -1,5 +1,6 @@
 package tree;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ public class MXMNode {
         childs = new ArrayList<MXMNode>();
         leafs = new ArrayList<MXMNode>();
         data = nodeValue;
-        this. incrementalPath = incrementalPath;
+        this.incrementalPath = incrementalPath;
     }
 
     public boolean isLeaf() {
@@ -25,9 +26,9 @@ public class MXMNode {
 
     public void addElement(String currentPath, String[] list) {
 
-        //Avoid first element that can be an empty string if you split a string that has a starting slash as /sd/card/
-        while( list[0] == null || list[0].equals("") )
+        while( list[0] == null || list[0].equals("") ) {
             list = Arrays.copyOfRange(list, 1, list.length);
+        }
 
         MXMNode currentChild = new MXMNode(list[0], currentPath+"/"+list[0]);
         if ( list.length == 1 ) {
@@ -51,21 +52,24 @@ public class MXMNode {
         return incrementalPath.equals( cmpObj.incrementalPath ) && data.equals( cmpObj.data );
     }
 
-    public void printNode( int increment ) {
-        for (int i = 0; i < increment; i++) {
-            System.out.print(" ");
+    public DefaultMutableTreeNode printNode( DefaultMutableTreeNode node) {
+
+        DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(data);
+        node.add(subNode);
+
+        for( MXMNode n: childs) {
+            n.printNode(subNode);
         }
-        System.out.println(incrementalPath + (isLeaf() ? " -> " + data : "")  );
-        for( MXMNode n: childs)
-            n.printNode(increment+2);
-        for( MXMNode n: leafs)
-            n.printNode(increment+2);
+
+        for( MXMNode n: leafs) {
+            n.printNode(subNode);
+        }
+
+        return subNode;
     }
 
     @Override
     public String toString() {
         return data;
     }
-
-
 }

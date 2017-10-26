@@ -1,6 +1,6 @@
 package tree;
 
-import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 public class MXMTree {
 
@@ -14,20 +14,22 @@ public class MXMTree {
 
     public void addElement( String elementValue ) {
         String[] list = elementValue.split("/");
-
-        // latest element of the list is the filename.extrension
         root.addElement(root.incrementalPath, list);
-
     }
 
-    public void printTree(JTree tree) {
+    public DefaultMutableTreeNode printTree() {
         getCommonRoot();
-        commonRoot.printNode(0);
+
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(root.incrementalPath);
+        node = commonRoot.printNode(node);
+
+        return node;
     }
 
     public MXMNode getCommonRoot() {
-        if ( commonRoot != null)
+        if ( commonRoot != null) {
             return commonRoot;
+        }
         else {
             MXMNode current = root;
             while ( current.leafs.size() <= 0 ) {
