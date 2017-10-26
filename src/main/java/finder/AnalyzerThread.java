@@ -1,9 +1,18 @@
 package finder;
 
+import tree.MXMNode;
+import tree.MXMTree;
+
 import javax.swing.*;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 public class AnalyzerThread extends Thread{
@@ -82,6 +91,16 @@ public class AnalyzerThread extends Thread{
                 }
             });
             list.setLayoutOrientation(JList.VERTICAL);
+
+
+            JTree tree = new JTree();
+            MXMTree treeStruct = new MXMTree(new MXMNode(path, path));
+            for (File entry : entryCollection) {
+                treeStruct.addElement(entry.getPath());
+            }
+
+            treeStruct.printTree(tree);
+
             v1Box.add(list);
             v1Box.add(Box.createVerticalGlue());
 
