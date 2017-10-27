@@ -1,19 +1,11 @@
 package finder;
 
-import tree.MXMNode;
-import tree.MXMTree;
-
 import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 public class AnalyzerThread extends Thread{
@@ -22,19 +14,25 @@ public class AnalyzerThread extends Thread{
     private String extension;
     private String search;
     private JTabbedPane tabbedPane;
-    private int lastIndex = -1;
+    private File lastFile = null;
+    private int width;
+    private int height;
 
     public AnalyzerThread(
             String search,
             String path,
             String extension,
-            JTabbedPane tabbedPane
+            JTabbedPane tabbedPane,
+            int width,
+            int height
     ) {
 
         this.search = search;
         this.path = path;
         this.extension = extension;
         this.tabbedPane = tabbedPane;
+        this.width = width;
+        this.height = height;
     }
 
     @Override
@@ -53,59 +51,60 @@ public class AnalyzerThread extends Thread{
             Box v1Box = Box.createVerticalBox();
             Box v2Box = Box.createVerticalBox();
 
-            DefaultListModel<String> listModel = new DefaultListModel<>();
+            jTreeModel model = new jTreeModel(path, entryCollection);
+            JTree tree = new JTree(model);
+            tree.setMinimumSize(new Dimension((int)(width * 0.3), height));
 
-            for (File entry : entryCollection) {
-                listModel.addElement(entry.toString());
-            }
 
-            JList<String> list = new JList<>(listModel);
-            list.addMouseListener(new java.awt.event.MouseAdapter(){
+            tree.addMouseListener(new java.awt.event.MouseAdapter(){
                 public void mouseClicked(java.awt.event.MouseEvent mouseEvent){
 
-                    if (!list.getCellBounds(list.getSelectedIndex(), list.getSelectedIndex()).contains(mouseEvent.getPoint())){
-                        list.removeSelectionInterval(list.getSelectedIndex(), list.getSelectedIndex());
-                    }
-                    int index = list.getSelectedIndex();
-                    if(index != lastIndex) {
-                        File file = entryCollection.get(index);
-                        v2Box.removeAll();
+                    TreePath treePath = tree.getPathForLocation(mouseEvent.getX(), mouseEvent.getY());
 
-                        JTextArea text = new JTextArea();
-                        try {
-                            BufferedReader in = new BufferedReader(new FileReader(file));
-                            String line = in.readLine();
-                            while(line != null){
-                                text.append(line + "\n");
-                                line = in.readLine();
+                    if(treePath != null) {
+                        String path = treePath.getLastPathComponent().toString();
+
+                        if (path.endsWith("." + extension)) {
+                            File file = new File(path);
+
+                            if (
+                                lastFile != file
+                                && file.exists()
+                                && file.isFile()
+                            ) {
+                                v2Box.removeAll();
+
+                                JTextArea text = new JTextArea();
+                                text.setPreferredSize(new Dimension(width,height));
+                                try {
+                                    BufferedReader in = new BufferedReader(new FileReader(file));
+                                    String line = in.readLine();
+                                    while (line != null) {
+                                        text.append(line + "\n");
+                                        line = in.readLine();
+                                    }
+
+                                    JScrollPane scrollPane = new JScrollPane(text);
+
+                                    v2Box.add(scrollPane);
+                                    v2Box.add(Box.createVerticalGlue());
+                                    hBox.repaint();
+
+                                } catch (Exception e) {
+                                    handleException(hBox, e);
+                                }
+
+                                lastFile = file;
                             }
-
-                            v2Box.add(text);
-                            v2Box.add(Box.createVerticalGlue());
-                            hBox.repaint();
-
-                        } catch (Exception e){
-                            handleException(hBox, e);
                         }
                     }
-                    lastIndex = index;
                 }
+
             });
-            list.setLayoutOrientation(JList.VERTICAL);
 
 
 
-            MXMTree mxmTree = new MXMTree(new MXMNode(path, path));
-            for (File entry : entryCollection) {
-                mxmTree.addElement(entry.getPath());
-            }
-
-            DefaultMutableTreeNode model = mxmTree.printTree();
-
-            JTree tree = new JTree(model);
             v1Box.add(tree);
-
-            v1Box.add(list);
             v1Box.add(Box.createVerticalGlue());
 
             hBox.add(v1Box);

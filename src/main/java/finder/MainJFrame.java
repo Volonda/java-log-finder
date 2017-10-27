@@ -13,7 +13,7 @@ public class MainJFrame extends JFrame {
     private JTextField fileExtension = new JTextField("log");
     private JLabel fileExtensionLabel = new JLabel("Расширение файлов");
     private File selectedFile;
-    private int width = 600;
+    private int width = 800;
     private int height = 600;
     private JLabel message = new JLabel();
     private JLabel searchLabel = new JLabel("Что искать?");
@@ -52,14 +52,16 @@ public class MainJFrame extends JFrame {
         super();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Определение менеджера расположения
         GroupLayout layout = new GroupLayout(getContentPane());
+
         getContentPane().setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
+
+
         message.setMaximumSize(new Dimension(width, 25));
         search.setMaximumSize(new Dimension(width, 20));
-        button.setMaximumSize(new Dimension(200, 20));
+        button.setMaximumSize(new Dimension(width /2, 20));
         ActionListener al = new JFileChooserActionListener();
         button.addActionListener(al);
         fileExtension.setMaximumSize(new Dimension(width, 25));
@@ -75,7 +77,9 @@ public class MainJFrame extends JFrame {
                         search.getText(),
                         selectedFile.toString(),
                         fileExtension.getText(),
-                        tabbedPane
+                        tabbedPane,
+                            width,
+                            height
                     );
 
                     thread.start();
@@ -110,22 +114,22 @@ public class MainJFrame extends JFrame {
 
         layout.setVerticalGroup(
             layout.createSequentialGroup().addGroup(
-                    layout.createParallelGroup()
+                    layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(searchLabel)
                         .addComponent(search)
                 ).addGroup(
-                    layout.createParallelGroup()
+                    layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(labelButton)
                         .addComponent(fcValue)
                         .addComponent(button)
                 ).addGroup(
-                    layout.createParallelGroup()
+                    layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(fileExtensionLabel)
                         .addComponent(fileExtension)
                         .addComponent(findButton)
                 )
                 .addGroup(
-                    layout.createParallelGroup()
+                    layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(tabbedPane)
                 )
         )
