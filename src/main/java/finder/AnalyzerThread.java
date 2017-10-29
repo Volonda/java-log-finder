@@ -1,11 +1,14 @@
 package finder;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.io.BufferedReader;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.File;
-import java.io.FileReader;
 import java.util.List;
 
 public class AnalyzerThread extends Thread{
@@ -14,9 +17,11 @@ public class AnalyzerThread extends Thread{
     private String extension;
     private String search;
     private JTabbedPane tabbedPane;
-    private File lastFile = null;
+    private File currentFile = null;
     private int width;
     private int height;
+    private int currentPage;
+    private JTextArea text = new JTextArea();
 
     public AnalyzerThread(
             String search,
@@ -61,30 +66,46 @@ public class AnalyzerThread extends Thread{
 
                     TreePath treePath = tree.getPathForLocation(mouseEvent.getX(), mouseEvent.getY());
 
-                    if(treePath != null) {
+                    if (treePath != null) {
                         String path = treePath.getLastPathComponent().toString();
 
                         if (path.endsWith("." + extension)) {
                             File file = new File(path);
 
                             if (
-                                lastFile != file
+                                currentFile != file
                                 && file.exists()
                                 && file.isFile()
                             ) {
                                 v2Box.removeAll();
-
-                                JTextArea text = new JTextArea();
-                                text.setPreferredSize(new Dimension(width,height));
+                                currentPage = 1;
+                                currentFile = file;
                                 try {
-                                    BufferedReader in = new BufferedReader(new FileReader(file));
-                                    String line = in.readLine();
-                                    while (line != null) {
-                                        text.append(line + "\n");
-                                        line = in.readLine();
-                                    }
 
+                                    loadNextPage();
                                     JScrollPane scrollPane = new JScrollPane(text);
+                                    scrollPane.setPreferredSize(new Dimension(200,300));
+
+                                    DefaultCaret caret = (DefaultCaret) text.getCaret();
+                                    caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+
+                                    AdjustmentListener adjustmentListener = new AdjustmentListener() {
+                                        public void adjustmentValueChanged(AdjustmentEvent adjustmentEvent) {
+
+                                            if (
+                                                (scrollPane.getViewport().getHeight() + adjustmentEvent.getAdjustable().getValue())
+                                                ==
+                                                adjustmentEvent.getAdjustable().getMaximum()
+                                            ) {
+                                                try {
+                                                    loadNextPage();
+                                                }catch ( Exception e){
+                                                    handleException(hBox, e);
+                                                }
+                                            }
+                                        }
+                                    };
+                                    scrollPane.getVerticalScrollBar().addAdjustmentListener(adjustmentListener);
 
                                     v2Box.add(scrollPane);
                                     v2Box.add(Box.createVerticalGlue());
@@ -94,7 +115,6 @@ public class AnalyzerThread extends Thread{
                                     handleException(hBox, e);
                                 }
 
-                                lastFile = file;
                             }
                         }
                     }
@@ -115,6 +135,19 @@ public class AnalyzerThread extends Thread{
         }
 
         tabbedPane.addTab("Результат", hBox);
+    }
+
+    private void loadNextPage() throws Exception
+    {
+        List<String> lines = finder.FileReader.readPage(currentFile, currentPage);
+
+        if (lines.size() > 0) {
+
+            for (String line : lines) {
+                text.append(line + "\n");
+            }
+            currentPage++;
+        }
     }
 
     private void handleException(Box hBox,Exception e)
