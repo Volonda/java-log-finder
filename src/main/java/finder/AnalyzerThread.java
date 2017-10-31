@@ -126,8 +126,8 @@ public class AnalyzerThread extends Thread{
         } catch (Exception e) {
           handleException(tabPanel, e);
         }
-
-        tabbedPane.addTab("Результат", tabPanel);
+        tabbedPane.add(tabPanel);
+        tabbedPane.setTabComponentAt(tabbedPane.indexOfComponent(tabPanel), JTabbedPaneWithCloseButton.getTitlePanel(tabbedPane, tabPanel, "Результат"));
     }
 
     private void loadNextPage() throws Exception
