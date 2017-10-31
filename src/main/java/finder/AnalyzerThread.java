@@ -1,8 +1,6 @@
 package finder;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -77,6 +75,7 @@ public class AnalyzerThread extends Thread{
                                 && file.exists()
                                 && file.isFile()
                             ) {
+                                text.setText("");
                                 v2Box.removeAll();
                                 currentPage = 1;
                                 currentFile = file;
