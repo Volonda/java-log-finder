@@ -16,6 +16,7 @@ public class AnalyzerThread extends Thread{
     private String search;
     private JTabbedPane tabbedPane;
     private File currentFile = null;
+    private boolean isFileLoaded = false;
     private int width;
     private int height;
     private int currentPage;
@@ -41,7 +42,12 @@ public class AnalyzerThread extends Thread{
     @Override
     public void start()
     {
-        Box hBox = Box.createHorizontalBox();
+        JPanel tabPanel = new JPanel();
+        tabPanel.setLayout(new BorderLayout());
+
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+        tabPanel.add(contentPanel);
 
         try {
             FileAnalyzer analyzer = new FileAnalyzer();
@@ -51,14 +57,8 @@ public class AnalyzerThread extends Thread{
                     search
             );
 
-            Box v1Box = Box.createVerticalBox();
-            Box v2Box = Box.createVerticalBox();
-
             jTreeModel model = new jTreeModel(path, entryCollection);
             JTree tree = new JTree(model);
-            tree.setMinimumSize(new Dimension((int)(width * 0.3), height));
-
-
             tree.addMouseListener(new java.awt.event.MouseAdapter(){
                 public void mouseClicked(java.awt.event.MouseEvent mouseEvent){
 
@@ -75,43 +75,43 @@ public class AnalyzerThread extends Thread{
                                 && file.exists()
                                 && file.isFile()
                             ) {
+                                //reset panel
                                 text.setText("");
-                                v2Box.removeAll();
-                                currentPage = 1;
+                                contentPanel.removeAll();
+                                currentPage = 0;
+                                isFileLoaded = false;
                                 currentFile = file;
-                                try {
 
-                                    loadNextPage();
-                                    JScrollPane scrollPane = new JScrollPane(text);
-                                    scrollPane.setPreferredSize(new Dimension(200,300));
+                                try {
 
                                     DefaultCaret caret = (DefaultCaret) text.getCaret();
                                     caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+
+                                    JScrollPane scrollPane = new JScrollPane(text);
 
                                     AdjustmentListener adjustmentListener = new AdjustmentListener() {
                                         public void adjustmentValueChanged(AdjustmentEvent adjustmentEvent) {
 
                                             if (
                                                 (scrollPane.getViewport().getHeight() + adjustmentEvent.getAdjustable().getValue())
-                                                ==
-                                                adjustmentEvent.getAdjustable().getMaximum()
+                                                    == adjustmentEvent.getAdjustable().getMaximum()
                                             ) {
                                                 try {
                                                     loadNextPage();
                                                 }catch ( Exception e){
-                                                    handleException(hBox, e);
+                                                    handleException(contentPanel, e);
                                                 }
                                             }
                                         }
                                     };
                                     scrollPane.getVerticalScrollBar().addAdjustmentListener(adjustmentListener);
+                                    contentPanel.add(scrollPane);
 
-                                    v2Box.add(scrollPane);
-                                    v2Box.add(Box.createVerticalGlue());
-                                    hBox.repaint();
+                                    tabPanel.validate();
+                                    tabPanel.repaint();
 
                                 } catch (Exception e) {
-                                    handleException(hBox, e);
+                                    handleException(contentPanel, e);
                                 }
 
                             }
@@ -121,35 +121,32 @@ public class AnalyzerThread extends Thread{
 
             });
 
-
-
-            v1Box.add(tree);
-            v1Box.add(Box.createVerticalGlue());
-
-            hBox.add(v1Box);
-            hBox.add(v2Box);
+            tabPanel.add(tree, BorderLayout.WEST);
 
         } catch (Exception e) {
-          handleException(hBox, e);
+          handleException(tabPanel, e);
         }
 
-        tabbedPane.addTab("Результат", hBox);
+        tabbedPane.addTab("Результат", tabPanel);
     }
 
     private void loadNextPage() throws Exception
     {
-        List<String> lines = finder.FileReader.readPage(currentFile, currentPage);
+       if (!isFileLoaded) {
+           List<String> lines = finder.FileReader.readPage(currentFile, currentPage);
 
-        if (lines.size() > 0) {
-
-            for (String line : lines) {
-                text.append(line + "\n");
-            }
-            currentPage++;
-        }
+           if (lines.size() > 0) {
+               for (String line : lines) {
+                   text.append(line + "\n");
+               }
+               currentPage++;
+           } else {
+               isFileLoaded = true;
+           }
+       }
     }
 
-    private void handleException(Box hBox,Exception e)
+    private void handleException(JComponent hBox,Exception e)
     {
         hBox.add(new JLabel("Ошибка:" + e.getMessage()));
     }

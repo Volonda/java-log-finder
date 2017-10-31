@@ -29,20 +29,16 @@ public class MainJFrame extends JFrame {
             fc.setCurrentDirectory(new File("/var/log"));
 
             int response = fc.showOpenDialog(MainJFrame.this);
-
+            message.setVisible(false);
             switch (response)
             {
                 case JFileChooser.APPROVE_OPTION:
                     fcValue.setText(fc.getSelectedFile().toString());
                     selectedFile = fc.getSelectedFile();
                     break;
-
-                case JFileChooser.CANCEL_OPTION:
-
-                    break;
-
                 case JFileChooser.ERROR_OPTION:
-
+                    message.setText("Возникла ошибка");
+                    message.setVisible(true);
                     break;
             }
         }
@@ -58,8 +54,7 @@ public class MainJFrame extends JFrame {
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
 
-
-        message.setMaximumSize(new Dimension(width, 25));
+        message.setVisible(false);
         search.setMaximumSize(new Dimension(width, 20));
         button.setMaximumSize(new Dimension(width /2, 20));
         ActionListener al = new JFileChooserActionListener();
@@ -89,6 +84,7 @@ public class MainJFrame extends JFrame {
 
         layout.setHorizontalGroup(
             layout.createParallelGroup()
+                .addComponent(message)
                 .addGroup(
                     layout.createSequentialGroup()
                         .addComponent(searchLabel)
@@ -113,7 +109,9 @@ public class MainJFrame extends JFrame {
         );
 
         layout.setVerticalGroup(
-            layout.createSequentialGroup().addGroup(
+            layout.createSequentialGroup()
+                .addComponent(message)
+                .addGroup(
                     layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(searchLabel)
                         .addComponent(search)

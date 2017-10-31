@@ -5,14 +5,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileReader {
-    private static int linesInPage = 50;
+public class FileReader
+{
+    private static int linesInPage = 500;
 
     public static List<String> readPage(File file, int page) throws Exception {
 
-        if (page < 1) {
+        if (page < 0) {
 
-           throw new Exception("page must be >= 1");
+           throw new Exception("page must be >= 0");
         }
 
         List<String> lines = new ArrayList<>();
@@ -24,7 +25,7 @@ public class FileReader {
         int lineNumFrom = page * linesInPage;
         int lineNumTill = ((page + 1) * linesInPage);
 
-        while (line != null && lineNum < lineNumTill && lineNum < 10000) {
+        while (line != null && lineNum < lineNumTill) {
 
             if (lineNum >= lineNumFrom) {
                 lines.add(line);
